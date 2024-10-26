@@ -22,7 +22,7 @@
 
 ### Config
 
-# Paradis (Router (DHCP Relay))
+#### Paradis (Router (DHCP Relay)) ####
 ```bash
 auto eth0
 iface eth0 inet dhcp
@@ -49,7 +49,7 @@ iface eth4 inet static
 
 up iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.79.0.0/16
 ```
-# Tybur (DHCP Server)
+#### Tybur (DHCP Server) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -58,7 +58,7 @@ iface eth0 inet static
   			gateway 10.79.4.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Fritz (DNS Server)
+#### Fritz (DNS Server) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -67,7 +67,7 @@ iface eth0 inet static
   			gateway 10.79.4.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Warhammer (Database Server)
+#### Warhammer (Database Server) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -76,7 +76,7 @@ iface eth0 inet static
   			gateway 10.79.3.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Beast (Load Balancer (Laravel))
+#### Beast (Load Balancer (Laravel)) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -85,7 +85,7 @@ iface eth0 inet static
   			gateway 10.79.3.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Colossal (Load Balancer (PHP))
+#### Colossal (Load Balancer (PHP)) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -94,7 +94,7 @@ iface eth0 inet static
   			gateway 10.79.3.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Annie (Laravel Worker)
+#### Annie (Laravel Worker) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -103,7 +103,7 @@ iface eth0 inet static
   			gateway 10.79.1.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Bertholdt (Laravel Worker)
+#### Bertholdt (Laravel Worker) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -112,7 +112,7 @@ iface eth0 inet static
   			gateway 10.79.1.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Reiner (Laravel Worker)
+#### Reiner (Laravel Worker) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -121,7 +121,7 @@ iface eth0 inet static
   			gateway 10.79.1.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Armin (PHP Worker)
+#### Armin (PHP Worker) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -130,7 +130,7 @@ iface eth0 inet static
   			gateway 10.79.2.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Eren (PHP Worker)
+#### Eren (PHP Worker) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -139,7 +139,7 @@ iface eth0 inet static
   			gateway 10.79.2.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Mikasa (PHP Worker)
+#### Mikasa (PHP Worker) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -148,7 +148,7 @@ iface eth0 inet static
   			gateway 10.79.2.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
-# Zeke (Client)
+#### Zeke (Client) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -159,7 +159,7 @@ iface eth0 inet static
 up echo nameserver 10.79.4.2 > /etc/resolv.conf // IP DNS Server
 up echo nameserver 192.168.122.1 >> /etc/resolv.conf
 ```
-# Erwin (Client)
+#### Erwin (Client) ####
 ```bash
 auto eth0
 iface eth0 inet static
@@ -170,3 +170,61 @@ iface eth0 inet static
 up echo nameserver 10.79.4.2 > /etc/resolv.conf // IP DNS Server
 up echo nameserver 192.168.122.1 >> /etc/resolv.conf
 ```
+
+### Soal 0
+<a name="soal-0"></a>
+Pulau Paradis telah menjadi tempat yang damai selama 1000 tahun, namun kedamaian tersebut tidak bertahan selamanya. Perang antara kaum Marley dan Eldia telah mencapai puncak. Kaum Marley yang dipimpin oleh Zeke, me-register domain name marley.yyy.com untuk worker Laravel mengarah pada Annie. Namun ternyata tidak hanya kaum Marley saja yang berinisiasi, kaum Eldia ternyata sudah mendaftarkan domain name eldia.yyy.com untuk worker PHP (0) mengarah pada Armin.
+#### Script ####
+```bash
+echo "zone \"marley.IT32.com\" {
+	type master;
+	file \"/etc/bind/jarkom/marley.IT32.com\";
+};
+
+zone \"eldia.IT32.com\" {
+	type master;
+	file \"/etc/bind/jarkom/eldia.IT32.com\";
+};
+" > /etc/bind/named.conf.local
+
+mkdir /etc/bind/jarkom
+
+marley="
+;
+;BIND data file for local loopback interface
+;
+\$TTL    604800
+@    IN    SOA    marley.IT32.com. root.marley.IT32.com. (
+        2        ; Serial
+                604800        ; Refresh
+                86400        ; Retry
+                2419200        ; Expire
+                604800 )    ; Negative Cache TTL
+;                   
+@    IN    NS    marley.IT32.com.
+@       IN    A    10.79.1.2
+"
+echo "$marley" > /etc/bind/jarkom/marley.IT32.com
+
+eldia="
+;
+;BIND data file for local loopback interface
+;
+\$TTL    604800
+@    IN    SOA    eldia.IT32.com. root.eldia.IT32.com. (
+        2        ; Serial
+                604800        ; Refresh
+                86400        ; Retry
+                2419200        ; Expire
+                604800 )    ; Negative Cache TTL
+;                   
+@    IN    NS    eldia.IT32.com.
+@       IN    A    10.79.2.1
+"
+echo "$eldia" > /etc/bind/jarkom/eldia.IT32.com
+
+service bind9 restart
+```
+#### Output ####
+<img src="img/hasil zeke.png">
+<img src="img/hasil erwin.png">
