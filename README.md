@@ -228,3 +228,9 @@ service bind9 restart
 #### Output ####
 <img src="img/hasil zeke.png">
 <img src="img/hasil erwin.png">
+
+### Soal 1
+<a name="soal-1"></a>
+Lakukan konfigurasi sesuai dengan peta yang sudah diberikan.
+#### Output ####
+Sesuai Config diatas
