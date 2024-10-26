@@ -18,4 +18,4 @@
 
 ### Topologi
 <a name="topologi"></a>
-<img src="img/topo.jpg">
+<img src="img/topo.png">
