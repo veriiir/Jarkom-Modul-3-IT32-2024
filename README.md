@@ -14,6 +14,10 @@
 - [Konfigurasi](#topologi)
 - [Nomor 0](#soal-0)
 - [Nomor 1](#soal-1)
+- [Nomor 2](#soal-2)
+- [Nomor 3](#soal-2)
+- [Nomor 4](#soal-2)
+- [Nomor 5](#soal-2)
 
 
 ### Topologi
