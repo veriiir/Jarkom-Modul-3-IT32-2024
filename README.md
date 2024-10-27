@@ -259,17 +259,17 @@ Sesuai Config diatas
 <a name="soal-2"></a>
 Jauh sebelum perang dimulai, ternyata para keluarga bangsawan, Tybur dan Fritz, telah membuat kesepakatan sebagai berikut:
 
-- [Semua Client harus menggunakan konfigurasi ip address dari keluarga Tybur (dhcp).]
+- Semua Client harus menggunakan konfigurasi ip address dari keluarga Tybur (dhcp).
 
-- [Client yang melalui bangsa marley mendapatkan range IP dari [prefix IP].1.05 - [prefix IP].1.25 dan [prefix IP].1.50 - [prefix IP].1.100 (2)]
+- Client yang melalui bangsa marley mendapatkan range IP dari [prefix IP].1.05 - [prefix IP].1.25 dan [prefix IP].1.50 - [prefix IP].1.100 (2)
 
-- [Client yang melalui bangsa eldia mendapatkan range IP dari [prefix IP].2.09 - [prefix IP].2.27 dan [prefix IP].2 .81 - [prefix IP].2.243 (3)]
+- Client yang melalui bangsa eldia mendapatkan range IP dari [prefix IP].2.09 - [prefix IP].2.27 dan [prefix IP].2 .81 - [prefix IP].2.243 (3)
 
-- [Client mendapatkan DNS dari keluarga Fritz dan dapat terhubung dengan internet melalui DNS tersebut (4)]
+- Client mendapatkan DNS dari keluarga Fritz dan dapat terhubung dengan internet melalui DNS tersebut (4)
 
-- [Dikarenakan keluarga Tybur tidak menyukai kaum eldia, maka mereka hanya meminjamkan ip address ke kaum eldia selama 6 menit. Namun untuk kaum marley, keluarga Tybur meminjamkan ip address selama 30 menit. Waktu maksimal dialokasikan untuk peminjaman alamat IP selama 87 menit. (5)]
+- Dikarenakan keluarga Tybur tidak menyukai kaum eldia, maka mereka hanya meminjamkan ip address ke kaum eldia selama 6 menit. Namun untuk kaum marley, keluarga Tybur meminjamkan ip address selama 30 menit. Waktu maksimal dialokasikan untuk peminjaman alamat IP selama 87 menit. (5)
 
-	- [*pada Paradis (DHCP Relay) kita dapat membuat script bernama paradis.sh yang mengarah ke Tybur (DHCP Server)*]
+	- *pada Paradis (DHCP Relay) kita dapat membuat script bernama paradis.sh yang mengarah ke Tybur (DHCP Server)*
 ### DHCP Relay (Paradis)
 ```bash
 service isc-dhcp-relay start 
@@ -283,7 +283,7 @@ echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
 
 service isc-dhcp-relay restart 
 ```
-*Note: Karena kebanyakan kode diletakan di file yang sama, maka soal digabung agar lebih efisien*
+- *Note: Karena kebanyakan kode diletakan di file yang sama, maka soal digabung agar lebih efisien*
 ### DHCP Server (Tybur)
 ```bash
 echo 'nameserver 10.79.4.2' >> /etc/resolv.conf   # Pastikan DNS Server sudah berjalan 
