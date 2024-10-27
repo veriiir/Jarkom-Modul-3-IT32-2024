@@ -1,4 +1,4 @@
-# Jarkom-Modul-3-IT32-2024
+![image](https://github.com/user-attachments/assets/8efb3383-b082-4bf4-a41c-0191b884c27b)![image](https://github.com/user-attachments/assets/64c12049-8186-4dae-87bf-6f1faa4cbca0)# Jarkom-Modul-3-IT32-2024
 
 ##### Praktikum Jaringan Komputer Modul 3 Tahun 2024
 
@@ -413,3 +413,46 @@ nginx -t
 ```
 #### Output ####
 <img src="img/no6.png">
+
+### Soal 7
+![image](https://github.com/user-attachments/assets/45245936-7246-4dce-9266-2aaba66f8518)
+
+hasil tesing di client. 
+
+**configuration**
+
+sebelum menjalankan konfigurasi, jalankan semua konfig pada nomer 6
+
+```bash
+[konfigurasi colossal]
+
+apt-get update
+apt-get install nginx -y
+
+echo 'upstream laravel {
+    server 10.79.2.2:8001;
+    server 10.79.2.3:8002;
+    server 10.79.2.4:8003;
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+            proxy_pass http://laravel;
+    }
+}' > /etc/nginx/sites-available/default
+
+service nginx restart
+
+[konfigurasi client (terserah, tapi pastikan mendapatkan lease)]
+echo nameserver 192.168.122.1 > /etc/resolv.conf
+echo nameserver 10.79.3.3 >> /etc/resolv.conf
+apt-get update
+apt-get install apache2 -y
+
+
+ab -n 6000 -c 200 http://10.79.3.3/
+```
+
