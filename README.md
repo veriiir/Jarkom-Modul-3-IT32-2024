@@ -170,6 +170,22 @@ iface eth0 inet static
 up echo nameserver 10.79.4.2 > /etc/resolv.conf // IP DNS Server
 up echo nameserver 192.168.122.1 >> /etc/resolv.conf
 ```
+### Setup Node
+#### Paradis (Router)
+```bash
+apt-get update
+apt install isc-dhcp-relay -y
+```
+#### Tybur (DHCP Server)
+```bash
+apt-get update
+apt-get install isc-dhcp-server -y
+```
+#### Fritz (DNS Server)
+```bash
+apt-get update
+apt-get install bind9 -y
+```
 
 ### Soal 0
 <a name="soal-0"></a>
