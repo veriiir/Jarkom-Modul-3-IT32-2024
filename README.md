@@ -84,7 +84,7 @@ up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```bash
 auto eth0
 iface eth0 inet static
- 			address 10.79.3.3
+ 			address 10.79.3.2
   			netmask 255.255.255.0
   			gateway 10.79.3.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
@@ -93,7 +93,7 @@ up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```bash
 auto eth0
 iface eth0 inet static
- 			address 10.79.3.2
+ 			address 10.79.3.3
   			netmask 255.255.255.0
   			gateway 10.79.3.1
 up echo nameserver 192.168.122.1 > /etc/resolv.conf
