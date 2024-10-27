@@ -284,6 +284,7 @@ echo net.ipv4.ip_forward=1 > /etc/sysctl.conf
 service isc-dhcp-relay restart 
 ```
 - *Note: Karena kebanyakan kode diletakan di file yang sama, maka soal digabung agar lebih efisien*
+
 ### DHCP Server (Tybur)
 ```bash
 echo 'nameserver 10.79.4.2' >> /etc/resolv.conf   # Pastikan DNS Server sudah berjalan 
@@ -331,4 +332,19 @@ subnet 10.79.4.0 netmask 255.255.255.0 {
 }' > /etc/dhcp/dhcpd.conf
 
 service isc-dhcp-server restart
+```
+- *Note: Pada soal ke-4 lakukan juga setup option pada Fritz (DNS Server)
+```bash
+echo 'options {
+        directory "/var/cache/bind";
+
+        forwarders {
+                192.168.122.1;
+         };
+
+        dnssec-validation no;
+        allow-query{any;};
+        auth-nxdomain no;
+        listen-on-v6 { any; };
+}; ' >/etc/bind/named.conf.options
 ```
