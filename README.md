@@ -348,3 +348,66 @@ echo 'options {
 #### Output No 4 ####
 <img src="img/hasil zeke.png">
 <img src="img/hasil erwin.png">
+
+### Soal no 6
+<a name="soal-6"></a>
+Armin berinisiasi untuk memerintahkan setiap worker PHP untuk melakukan konfigurasi virtual host untuk website berikut https://intip.in/BangsaEldia dengan menggunakan php 7.3 (6)
+
+- Untuk itu jalankan script berikut di semua php worker yaitu; Armin, Eren dan Mikasa
+```bash
+echo 'nameserver 10.79.4.2' > /etc/resolv.conf
+apt-get update
+apt-get install nginx -y
+apt-get install wget -y
+apt-get install unzip -y
+apt-get install lynx -y
+apt-get install htop -y
+apt-get install apache2-utils -y
+apt-get install php7.3-fpm php7.3-common php7.3-mysql php7.3-gmp php7.3-curl php7.3-intl php7.3-mbstring php7.3-xmlrpc php7.3-gd php7.3-xml php7.3-cli php7.3-zip -y
+
+service nginx start
+service php7.3-fpm start
+
+mkdir -p /var/www/eldia.it32.com
+
+wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1TvebIeMQjRjFURKVtA32lO9aL7U2msd6' -O /root/bangsaEldia.zip
+unzip /root/bangsaEldia.zip -d /var/www/eldia.it32.com
+rm -rf /root/bangsaEldia.zip
+
+echo '
+server {
+
+        listen 80;
+
+        root /var/www/eldia.it32.com;
+
+        index index.php index.html index.htm;
+        server_name _;
+
+        location / {
+                        try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        # pass PHP scripts to FastCGI server
+        location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+        }
+
+location ~ /\.ht {
+                        deny all;
+        }
+
+        error_log /var/log/nginx/jarkom_error.log;
+        access_log /var/log/nginx/jarkom_access.log;
+ }' > /etc/nginx/sites-available/eldia.it32.com
+
+ln -s /etc/nginx/sites-available/eldia.it32.com /etc/nginx/sites-enabled
+rm -rf /etc/nginx/sites-enabled/default
+
+service php7.3-fpm start
+service php7.3-fpm restart
+service nginx restart
+nginx -t
+```
+#### Output ####
