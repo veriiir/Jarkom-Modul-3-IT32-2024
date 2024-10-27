@@ -339,6 +339,12 @@ echo 'options {
         listen-on-v6 { any; };
 }; ' >/etc/bind/named.conf.options
 ```
-#### Output ####
+#### Output No 2 ####
+<img src="img/no3.png">
+
+#### Output No 3 ####
+<img src="img/no4.png">
+
+#### Output No 4 ####
 <img src="img/hasil zeke.png">
 <img src="img/hasil erwin.png">
