@@ -18,6 +18,7 @@
 - [Nomor 3](#soal-2)
 - [Nomor 4](#soal-2)
 - [Nomor 5](#soal-2)
+- [Nomor 6](#soal-6)
 
 
 ### Topologi
@@ -411,3 +412,4 @@ service nginx restart
 nginx -t
 ```
 #### Output ####
+<img src="img/no6.png">
