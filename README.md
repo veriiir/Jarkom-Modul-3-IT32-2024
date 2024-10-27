@@ -340,10 +340,10 @@ echo 'options {
 }; ' >/etc/bind/named.conf.options
 ```
 #### Output No 2 ####
-<img src="img/no3.png">
+<img src="img/no4.png">
 
 #### Output No 3 ####
-<img src="img/no4.png">
+<img src="img/no3.png">
 
 #### Output No 4 ####
 <img src="img/hasil zeke.png">
