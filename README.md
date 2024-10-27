@@ -155,10 +155,7 @@ up echo nameserver 192.168.122.1 > /etc/resolv.conf
 #### Zeke (Client) ####
 ```bash
 auto eth0
-iface eth0 inet static
-  address 10.79.1.5
-  netmask 255.255.255.0
-  gateway 10.79.1.1
+iface eth0 inet dhcp
 
 up echo nameserver 10.79.4.2 > /etc/resolv.conf // IP DNS Server
 up echo nameserver 192.168.122.1 >> /etc/resolv.conf
@@ -166,10 +163,7 @@ up echo nameserver 192.168.122.1 >> /etc/resolv.conf
 #### Erwin (Client) ####
 ```bash
 auto eth0
-iface eth0 inet static
-  address 10.79.2.5
-  netmask 255.255.255.0
-  gateway 10.79.2.1
+iface eth0 inet dhcp
 
 up echo nameserver 10.79.4.2 > /etc/resolv.conf // IP DNS Server
 up echo nameserver 192.168.122.1 >> /etc/resolv.conf
@@ -245,9 +239,6 @@ echo "$eldia" > /etc/bind/jarkom/eldia.IT32.com
 
 service bind9 restart
 ```
-#### Output ####
-<img src="img/hasil zeke.png">
-<img src="img/hasil erwin.png">
 
 ### Soal 1
 <a name="soal-1"></a>
@@ -348,3 +339,6 @@ echo 'options {
         listen-on-v6 { any; };
 }; ' >/etc/bind/named.conf.options
 ```
+#### Output ####
+<img src="img/hasil zeke.png">
+<img src="img/hasil erwin.png">
