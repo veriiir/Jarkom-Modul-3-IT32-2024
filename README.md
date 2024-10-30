@@ -17,6 +17,13 @@
 - [Nomor 4](#soal-2)
 - [Nomor 5](#soal-2)
 - [Nomor 6](#soal-6)
+- [Nomor 7](#soal-7)
+- [Nomor 8](#soal-8)
+- [Nomor 9](#soal-9)
+- [Nomor 10](#soal-10)
+- [Nomor 11](#soal-11)
+- [Nomor 12](#soal-12)
+- [Nomor 13](#soal-13)
 
 
 ### Topologi
@@ -446,11 +453,11 @@ echo nameserver 10.79.3.3 >> /etc/resolv.conf
 apt-get update
 apt-get install apache2 -y
 ```
+Kemudian Cek dengan Command
+```bash
+ab -n 6000 -c 200 10.79.3.3
+```
+###Output
 ![image](https://github.com/user-attachments/assets/45245936-7246-4dce-9266-2aaba66f8518)
 
-hasil tesing di client. 
-
-**configuration**
-
-sebelum menjalankan konfigurasi, jalankan semua konfig pada nomer 6
 
