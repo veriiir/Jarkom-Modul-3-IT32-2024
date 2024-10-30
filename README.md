@@ -478,4 +478,597 @@ ab -n 6000 -c 200 10.79.3.3
 ### Output												
 ![image](https://github.com/user-attachments/assets/45245936-7246-4dce-9266-2aaba66f8518)
 
+### Soal 8
+<a name="soal-8"></a>
+Karena Erwin meminta “laporan kerja Armin”, maka dari itu buatlah analisis hasil testing dengan 1000 request dan 75 request/second untuk masing-masing algoritma Load Balancer dengan ketentuan sebagai berikut: a. Nama Algoritma Load Balancer b. Report hasil testing pada Apache Benchmark c. Grafik request per second untuk masing masing algoritma. d. Analisis (8)
+*Untuk Melakukan testing semua algoritma load balancer kita gunakan script sebagai berikut*
+```bash
+echo 'upstream round_robin  {
+    server 10.79.2.2 ; #IP Armin
+    server 10.79.2.3 ; #IP Eren
+    server 10.79.2.4 ; #IP Mikasa
+}
 
+server {
+    listen 8080;
+        
+
+        location / {
+            proxy_pass http://round_robin;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/lb_error.log;
+    access_log /var/log/nginx/lb_access.log;
+}' >/etc/nginx/sites-available/round-robin
+
+echo 'upstream generic_hash  {
+    hash $request_uri consistent;
+    server 10.79.2.2 ; #IP Armin
+    server 10.79.2.3 ; #IP Eren
+    server 10.79.2.4 ; #IP Mikasa
+}
+
+server {
+    listen 8081;
+
+        location / {
+            proxy_pass http://generic_hash;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/lb_error.log;
+    access_log /var/log/nginx/lb_access.log;
+}' >/etc/nginx/sites-available/generic-hash
+
+echo 'upstream ip_hash  {
+    ip_hash;
+    server 10.79.2.2 ; #IP Armin
+    server 10.79.2.3 ; #IP Eren
+    server 10.79.2.4 ; #IP Mikasa
+}
+
+server {
+    listen 8082;
+
+        location / {
+            proxy_pass http://ip_hash;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/lb_error.log;
+    access_log /var/log/nginx/lb_access.log;
+}' >/etc/nginx/sites-available/ip-hash
+
+echo 'upstream least_conn  {
+    least_conn;
+    server 10.79.2.2 ; #IP Armin
+    server 10.79.2.3 ; #IP Eren
+    server 10.79.2.4 ; #IP Mikasa
+}
+
+server {
+    listen 8083;
+        
+        location / {
+            proxy_pass http://least_conn;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/lb_error.log;
+    access_log /var/log/nginx/lb_access.log;
+}' >/etc/nginx/sites-available/least-conn
+
+unlink /etc/nginx/sites-enabled/default
+
+ln -s /etc/nginx/sites-available/round-robin /etc/nginx/sites-enabled/round-robin
+ln -s /etc/nginx/sites-available/generic-hash /etc/nginx/sites-enabled/generic-hash
+ln -s /etc/nginx/sites-available/ip-hash /etc/nginx/sites-enabled/ip-hash
+ln -s /etc/nginx/sites-available/least-conn /etc/nginx/sites-enabled/least-conn
+
+service nginx restart
+```
+*kita bisa membuat laporan pada client dengan script sebagai berikut*
+```bash
+#!/bin/bash
+
+LB_ADDR="10.79.4.3"
+
+RR_IP="8080"    # IP Round Robin
+IPH_IP="8082"   # IP IP Hash
+GENH_IP="8081"  # IP Generic Hash
+
+LC3W_IP="8083"  # IP Least Conn 3 Workers
+LC2W_IP="8004"  # IP Least Conn 2 Workers
+LC1W_IP="8005"  # IP Least Conn 1 Worker
+
+mkdir -p /root/report
+
+RoundRobinTest() {
+  AMT=$1
+  CON=$2
+
+  echo "$(ab -n $AMT -c $CON http:\/\/$LB_ADDR:$RR_IP\/)" > /root/report/round_robin_test.bin
+  echo "Round Robin Test Done"
+}
+
+IPHashTest() {
+  AMT=$1
+  CON=$2
+
+  echo "$(ab -n $AMT -c $CON http:\/\/$LB_ADDR:$IPH_IP\/)" > /root/report/ip_hash_test.bin
+  echo "IP Hash Test Done"
+}
+
+GenHashTest() {
+  AMT=$1
+  CON=$2
+
+  echo "$(ab -n $AMT -c $CON http:\/\/$LB_ADDR:$GENH_IP\/)" > /root/report/gen_hash_test.bin
+  echo "Generic Hash Test Done"
+}
+
+LeastConn3Test() {
+  AMT=$1
+  CON=$2
+
+  echo "$(ab -n $AMT -c $CON http:\/\/$LB_ADDR:$LC3W_IP\/)" > /root/report/least_conn_3_test.bin
+  echo "Least Connection with 3 Workers Test Done"
+}
+
+LeastConn2Test() {
+  AMT=$1
+  CON=$2
+
+  echo "$(ab -n $AMT -c $CON http:\/\/$LB_ADDR:$LC2W_IP\/)" > /root/report/least_conn_2_test.bin
+  echo "Least Connection with 2 Workers Test Done"
+}
+
+LeastConn1Test() {
+  AMT=$1
+  CON=$2
+
+  echo "$(ab -n $AMT -c $CON http:\/\/$LB_ADDR:$LC1W_IP\/)" > /root/report/least_conn_1_test.bin
+  echo "Least Connection with 1 Worker Test Done"
+}
+
+SingleTest() {
+  echo "
+========== Single Test ==========
+
+Pilih Load Balancer:
+
+1.) Round Robin - 3 Workers
+2.) IP Hash - 3 Workers
+3.) Generic Hash - 3 Workers
+4.) Least Connection - 3 Workers
+5.) Least Connection - 2 Workers
+6.) Least Connection - 1 Workers
+"
+
+  echo -n "Pilih Opsi Pengujian: "
+  read optLB
+
+  if [ $optLB -eq 1 ];
+  then
+    echo -n "Masukkan Jumlah Request: "
+    read inReq
+    echo -n "Masukkan Jumlah Concurrency: "
+    read inCon
+
+    RoundRobinTest $inReq $inCon
+
+    echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+    echo -e "\nKeterangan Pengujian"
+    echo -e "Nama Load Balancer: \t Round Robin"
+    echo -e "Jumlah Worker: \t\t 3 Workers"
+
+    echo -e "\nTabel Hasil\n"
+    # Menampilkan header tabel
+    echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+    # Mengambil data dari file
+    awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Round Robin\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/round_robin_test.bin
+    echo -e "\n\n+++++ Akhir Laporan +++++\n"
+  elif [ $optLB -eq 2 ]; then
+    echo -n "Masukkan Jumlah Request: "
+    read inReq
+    echo -n "Masukkan Jumlah Concurrency: "
+    read inCon
+
+    IPHashTest $inReq $inCon
+
+    echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+    echo -e "\nKeterangan Pengujian"
+    echo -e "Nama Load Balancer: \t IP Hash"
+    echo -e "Jumlah Worker: \t\t 3 Workers"
+
+    echo -e "\nTabel Hasil\n"
+    # Menampilkan header tabel
+    echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+    # Mengambil data dari file
+    awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "IP Hash\t\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/ip_hash_test.bin
+    echo -e "\n\n+++++ Akhir Laporan +++++\n"
+  elif [ $optLB -eq 3 ]; then
+    echo -n "Masukkan Jumlah Request: "
+    read inReq
+    echo -n "Masukkan Jumlah Concurrency: "
+    read inCon
+
+    GenHashTest $inReq $inCon
+
+    echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+    echo -e "\nKeterangan Pengujian"
+    echo -e "Nama Load Balancer: \t Generic Hash"
+    echo -e "Jumlah Worker: \t\t 3 Workers"
+
+    echo -e "\nTabel Hasil\n"
+    # Menampilkan header tabel
+    echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+    # Mengambil data dari file
+    awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Generic Hash\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/gen_hash_test.bin
+    echo -e "\n\n+++++ Akhir Laporan +++++\n"
+  elif [ $optLB -eq 4 ]; then
+    echo -n "Masukkan Jumlah Request: "
+    read inReq
+    echo -n "Masukkan Jumlah Concurrency: "
+    read inCon
+
+    LeastConn3Test $inReq $inCon
+
+    echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+    echo -e "\nKeterangan Pengujian"
+    echo -e "Nama Load Balancer: \t Least Connection"
+    echo -e "Jumlah Worker: \t\t 3 Workers"
+
+    echo -e "\nTabel Hasil\n"
+    # Menampilkan header tabel
+    echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+    # Mengambil data dari file
+    awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Least Conn\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/least_conn_3_test.bin
+    echo -e "\n\n+++++ Akhir Laporan +++++\n"
+  elif [ $optLB -eq 5 ]; then
+    echo -n "Masukkan Jumlah Request: "
+    read inReq
+    echo -n "Masukkan Jumlah Concurrency: "
+    read inCon
+
+    LeastConn2Test $inReq $inCon
+
+    echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+    echo -e "\nKeterangan Pengujian"
+    echo -e "Nama Load Balancer: \t Least Connection"
+    echo -e "Jumlah Worker: \t\t 2 Workers"
+
+    echo -e "\nTabel Hasil\n"
+    # Menampilkan header tabel
+    echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+    # Mengambil data dari file
+    awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Least Conn\t2\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/least_conn_2_test.bin
+    echo -e "\n\n+++++ Akhir Laporan +++++\n"
+  elif [ $optLB -eq 6 ]; then
+    echo -n "Masukkan Jumlah Request: "
+    read inReq
+    echo -n "Masukkan Jumlah Concurrency: "
+    read inCon
+
+    LeastConn1Test $inReq $inCon
+
+    echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+    echo -e "\nKeterangan Pengujian"
+    echo -e "Nama Load Balancer: \t LEast Connection"
+    echo -e "Jumlah Worker: \t\t 1 Workers"
+
+    echo -e "\nTabel Hasil\n"
+    # Menampilkan header tabel
+    echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+    # Mengambil data dari file
+    awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Least Conn\t1\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/least_conn_1_test.bin
+    echo -e "\n\n+++++ Akhir Laporan +++++\n"
+  else
+    echo "Unknown Input"
+  fi
+}
+
+MultiTestLB() {
+  echo "
+========== Multi Test - By LB Method ==========
+
+"
+  echo -n "Masukkan Jumlah Request: "
+  read inReq
+  echo -n "Masukkan Jumlah Concurrency: "
+  read inCon
+
+  RoundRobinTest $inReq $inCon
+  sleep 1
+  IPHashTest $inReq $inCon
+  sleep 1
+  GenHashTest $inReq $inCon
+  sleep 1
+  LeastConn3Test $inReq $inCon
+
+  echo "Multi Test Done"
+
+  echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+  echo -e "\nKeterangan Pengujian"
+  echo -e "Nama Load Balancer: \t Round Robin, Least Connection, IP Hash, dan Generic Hash"
+  echo -e "Jumlah Worker: \t\t 3 Workers"
+
+  echo -e "\nTabel Hasil\n"
+  # Menampilkan header tabel
+  echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+  # Mengambil data dari file
+  awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Round Robin\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/round_robin_test.bin
+  awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Least Conn\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/least_conn_3_test.bin
+  awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "IP Hash\t\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/ip_hash_test.bin
+  awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Generic Hash\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/gen_hash_test.bin
+  echo -e "\n\n+++++ Akhir Laporan +++++\n"
+}
+
+MultiTestWorker() {
+  echo "
+========== Multi Test - By Worker Amount ==========
+
+"
+
+  echo -n "Masukkan Jumlah Request: "
+  read inReq
+  echo -n "Masukkan Jumlah Concurrency: "
+  read inCon
+
+  LeastConn3Test $inReq $inCon
+  sleep 1
+  LeastConn2Test $inReq $inCon
+  sleep 1
+  LeastConn1Test $inReq $inCon
+  sleep 1
+
+  echo "Multi Test Done"
+
+  echo -e "\n\n+++++ Laporan Hasil Pengujian Load Balancer +++++"
+  echo -e "\nKeterangan Pengujian"
+  echo -e "Nama Load Balancer: \t Round Robin, Least Connection, IP Hash, dan Generic Hash"
+  echo -e "Jumlah Worker: \t\t 3 Workers"
+
+  echo -e "\nTabel Hasil\n"
+  # Menampilkan header tabel
+  echo -e "Load Balancer\tWorker(s)\tReq per second\tComplete req\tFailed req\tTime per req\tTransfer rate"
+
+  # Mengambil data dari file
+  awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Least Conn\t3\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/least_conn_3_test.bin
+  awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Least Conn\t2\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/least_conn_2_test.bin
+  awk '/Requests per second/{req_sec=$(NF-2)} /Complete requests/{comp_req=$NF} /Failed requests/{fail_req=$NF} /Time per request/{time_req=$(NF-6)} /Transfer rate/{transfer_rate=$(NF-2)} END {printf "Least Conn\t1\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n", req_sec, comp_req, fail_req, time_req, transfer_rate}' /root/report/least_conn_1_test.bin
+  echo -e "\n\n+++++ Akhir Laporan +++++\n"
+}
+
+echo "
+========== Apache Benchmarking ==========
+             By Jarkom-IT32
+
+Opsi Pengujian Load Balancer:
+
+1.) Single Test
+2.) Multi Test - By LB Method
+3.) Multi Test - By Worker Amount
+
+"
+
+echo -n "Pilih Opsi Pengujian: "
+read optLB
+
+if [ $optLB -eq 1 ];
+then
+  SingleTest
+elif [ $optLB -eq 2 ]; then
+  MultiTestLB
+elif [ $optLB -eq 3 ]; then
+  MultiTestWorker
+else
+  echo "Unknown Input"
+fi
+```
+### Soal 9
+<a name="soal-9"></a>
+Dengan menggunakan algoritma Least-Connection, lakukan testing dengan menggunakan 3 worker, 2 worker, dan 1 worker sebanyak 1000 request dengan 10 request/second, kemudian tambahkan grafiknya pada “laporan kerja Armin”. (9)
+*Maka kita perlu menjalankan sh berikut pada load balancer*
+```bash
+echo 'upstream least_conn_2_worker  {
+    least_conn;
+    server 10.79.2.2 ; #IP Armin
+    server 10.79.2.3 ; #IP Eren
+}
+
+server {
+    listen 8084;
+
+        location / {
+            proxy_pass http://least_conn_2_worker;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/lb_error.log;
+    access_log /var/log/nginx/lb_access.log;
+}' >/etc/nginx/sites-available/least-conn-2-worker
+
+
+echo 'upstream least_conn_1_worker  {
+    least_conn;
+    server 10.79.2.2 ; #IP Armin
+}
+
+server {
+    listen 8085;
+
+        location / {
+            proxy_pass http://least_conn_1_worker;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/lb_error.log;
+    access_log /var/log/nginx/lb_access.log;
+}' >/etc/nginx/sites-available/least-conn-1-worker
+
+ln -s /etc/nginx/sites-available/least-conn-2-worker /etc/nginx/sites-enabled/least-conn-2-worker
+ln -s /etc/nginx/sites-available/least-conn-1-worker /etc/nginx/sites-enabled/least-conn-1-worker
+
+service nginx restart
+```
+
+### Soal 10
+<a name="soal-10"></a>
+Selanjutnya coba tambahkan keamanan dengan konfigurasi autentikasi di Colossal dengan dengan kombinasi username: “arminannie” dan password: “jrkmyyy”, dengan yyy merupakan kode kelompok. Terakhir simpan file “htpasswd” nya di /etc/nginx/supersecret/ (10)
+*Untuk menambahkan keamanan dengan username dan password berikut maka kita akan menjalankan script berikut pada load balancer*
+```bash
+mkdir /etc/nginx/supersecret/
+
+htpasswd -bc /etc/nginx/supersecret/htpasswd arminannie jrkmit32
+echo 'upstream round_robin  {
+    server 10.79.2.2 ; #IP Armin
+    server 10.79.2.3 ; #IP Eren
+    server 10.79.2.4 ; #IP Mikasa
+}
+
+server {
+    listen 8080;
+
+
+        location / {
+            auth_basic "Restricted Content";
+            auth_basic_user_file /etc/nginx/supersecret/htpasswd;
+            proxy_pass http://round_robin;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/lb_error.log;
+    access_log /var/log/nginx/lb_access.log;
+}' >/etc/nginx/sites-available/round-robin
+
+
+ln -s /etc/nginx/sites-available/round-robin /etc/nginx/sites-enabled/round-robin
+
+service nginx restart
+```
+### Soal 11
+<a name="soal-11"></a>
+Lalu buat untuk setiap request yang mengandung /titan akan di proxy passing menuju halaman https://attackontitan.fandom.com/wiki/Attack_on_Titan_Wiki (11)
+*Jalankan script berikut pada load balancer*
+```bash
+echo '
+ upstream myweb  {
+        least_conn;
+        server 10.79.2.2; #IP Armin
+        server 10.79.2.3; #IP Eren
+        server 10.79.2.4; #IP Mikasa
+ }
+
+ server {
+        listen 80;
+        server_name eldia.32.com;
+
+        location / {
+        auth_basic "Restricted Access";
+        auth_basic_user_file /etc/nginx/supersecret/htpasswd;
+        proxy_pass http://myweb;
+        }
+
+        location /titan/ {
+        proxy_pass https://attackontitan.fandom.com/wiki/Attack_on_Titan_Wiki/;
+        }
+ }' > /etc/nginx/sites-available/lb-php
+
+ln -s /etc/nginx/sites-available/lb-php /etc/nginx/sites-enabled
+rm -rf /etc/nginx/sites-enabled/default
+
+service nginx restart
+nginx -t
+```
+### Soal 12
+<a name="soal-12"></a>
+Selanjutnya Colossal ini hanya boleh diakses oleh client dengan IP [Prefix IP].1.77, [Prefix IP].1.88, [Prefix IP].2.144, dan [Prefix IP].2.156. (12)
+```bash
+# Pada Colossal
+
+echo '
+ upstream myweb  {
+        least_conn;
+        server 10.79.2.2; #IP Armin
+        server 10.79.2.3; #IP Eren
+        server 10.79.2.4; #IP Mikasa
+ }
+
+server {
+	listen 80;
+	server_name eldia.18.com;
+
+	location / {
+		allow 10.79.1.77;
+		allow 10.79.1.88;
+		allow 10.79.2.144;
+		allow 10.79.2.156;
+		deny all;
+
+		auth_basic "Restricted Content";
+		auth_basic_user_file /etc/nginx/supersecret/htpasswd;
+		proxy_pass http://myweb;
+	}
+
+	location /dune {
+		proxy_pass https://attackontitan.fandom.com/wiki/Attack_on_Titan_Wiki/;
+	}
+}' > /etc/nginx/sites-available/lb-php
+
+ln -s /etc/nginx/sites-available/lb-php /etc/nginx/sites-enabled
+rm -rf /etc/nginx/sites-enabled/default
+
+service nginx restart
+nginx -t
+
+# Tybur
+echo 'host Zeke{
+        hardware ethernet fa:61:fb:1a:8d:5b;
+        fixed-address 10.79.1.77;
+}
+' >> /etc/dhcp/dhcpd.conf
+
+service isc-dhcp-server restart
+
+# Zeke
+echo 'hwaddress ether fa:61:fb:1a:8d:5b' >> /etc/network/interfaces
+```
+### Soal 13
+<a name="soal-13"></a>
+Melihat perlawanan yang sengit dari kaum eldia, kaum marley pun memutar otak dan mengatur para worker di marley. Karena mengetahui bahwa ada keturunan marley yang mewarisi kekuatan titan, Zeke pun berinisiatif untuk menyimpan data data penting di Warhammer, dan semua data tersebut harus dapat diakses oleh anak buah kesayangannya, Annie, Reiner, dan Berthold. (13)
+```bash
+# Pada Warhammer
+mysql -u root -p
+
+CREATE USER 'kelompokit32'@'%' IDENTIFIED BY 'passwordit32';
+CREATE USER 'kelompokit32'@'localhost' IDENTIFIED BY 'passwordit32';
+CREATE DATABASE dbkelompokit32;
+GRANT ALL PRIVILEGES ON *.* TO 'kelompokit32'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'kelompokit32'@'localhost';
+FLUSH PRIVILEGES;
+exit
+```
+Lalu akses pada semua laravel worker dengan menggunakan mariadb --host=10.79.3.4 --port=3306 --user=kelompokit32 --password 
