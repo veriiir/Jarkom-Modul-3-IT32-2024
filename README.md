@@ -1,5 +1,3 @@
-![image](https://github.com/user-attachments/assets/8efb3383-b082-4bf4-a41c-0191b884c27b)![image](https://github.com/user-attachments/assets/64c12049-8186-4dae-87bf-6f1faa4cbca0)# Jarkom-Modul-3-IT32-2024
-
 ##### Praktikum Jaringan Komputer Modul 3 Tahun 2024
 
 ### Author
@@ -415,14 +413,10 @@ nginx -t
 <img src="img/no6.png">
 
 ### Soal 7
-![image](https://github.com/user-attachments/assets/45245936-7246-4dce-9266-2aaba66f8518)
+<a name="soal-7"></a>
+Dikarenakan Armin sudah mendapatkan kekuatan titan colossal, maka bantulah kaum eldia menggunakan colossal agar dapat bekerja sama dengan baik. Kemudian lakukan testing dengan 6000 request dan 200 request/second. (7)
 
-hasil tesing di client. 
-
-**configuration**
-
-sebelum menjalankan konfigurasi, jalankan semua konfig pada nomer 6
-
+Kita perlu jalankan Script dibawah ini untuk setup load balancer pada colossal
 ```bash
 [konfigurasi colossal]
 
@@ -451,8 +445,12 @@ echo nameserver 192.168.122.1 > /etc/resolv.conf
 echo nameserver 10.79.3.3 >> /etc/resolv.conf
 apt-get update
 apt-get install apache2 -y
-
-
-ab -n 6000 -c 200 http://10.79.3.3/
 ```
+![image](https://github.com/user-attachments/assets/45245936-7246-4dce-9266-2aaba66f8518)
+
+hasil tesing di client. 
+
+**configuration**
+
+sebelum menjalankan konfigurasi, jalankan semua konfig pada nomer 6
 
