@@ -453,11 +453,29 @@ echo nameserver 10.79.3.3 >> /etc/resolv.conf
 apt-get update
 apt-get install apache2 -y
 ```
+lalu ubah alamat ip Fritz
+```bash
+echo ';
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     eldia.it32.com. root.eldia.it32.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      eldia.it32.com.
+@       IN      A       10.79.3.3     ; IP Colossal' > /etc/bind/jarkom/eldia.it32.com
+
+service bind9 restart
+```
 Kemudian Cek dengan Command
 ```bash
 ab -n 6000 -c 200 10.79.3.3
 ```
-###Output
+### Output												
 ![image](https://github.com/user-attachments/assets/45245936-7246-4dce-9266-2aaba66f8518)
 
 
